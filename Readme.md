@@ -75,4 +75,4 @@ A huge thanks for setting such a great reference point for writing clean, scalab
 
 Made with ❤️ by Kuldeep
 
-“A great URL doesn't need to be long — just smart.” 🔗✨
+✨ "A powerful prompt isn’t long — it’s precise." 📝⚡
