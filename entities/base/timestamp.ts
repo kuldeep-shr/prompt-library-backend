@@ -1,9 +1,9 @@
 import { CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 export class DateTimeEntity {
-  @CreateDateColumn()
-  createdAt!: Date;
+  @CreateDateColumn({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @UpdateDateColumn({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
+  updated_at!: Date;
 }

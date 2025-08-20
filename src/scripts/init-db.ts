@@ -7,12 +7,10 @@ const initDB = async () => {
     const queryRunner = AppDataSource.createQueryRunner();
 
     const tables = await queryRunner.getTables([
-      "user_auth",
-      "short_urls",
-      "url_access_logs",
+      "users"
     ]);
 
-    if (tables.length === 3) {
+    if (tables.length === 4) {
       console.log("✅ Tables already exist. Skipping creation.");
     } else {
       console.log("📦 Creating missing tables...");

@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  Unique,
+  OneToMany,
+} from "typeorm";
 import { DateTimeEntity } from "../base/timestamp";
 import { Prompt } from "../prompt/Prompt";
 
@@ -17,7 +23,7 @@ export class User extends DateTimeEntity {
   @Column({ type: "varchar", length: 200 })
   password!: string;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
   lastLogin!: Date;
 
   @Column({ default: true })

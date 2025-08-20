@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  Index,
+} from "typeorm";
 import { DateTimeEntity } from "../base/timestamp";
 import { Category } from "./Category";
 import { User } from "../user/User";
@@ -22,6 +28,6 @@ export class Prompt extends DateTimeEntity {
   @ManyToOne(() => User, (user) => user.prompts, { eager: true })
   created_by!: User;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
   last_updated!: Date;
 }
