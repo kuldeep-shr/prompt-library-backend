@@ -137,9 +137,9 @@ export const updatePromptService = async (
   });
   if (!prompt) throw new Error("Prompt not found");
 
-  if (title) prompt.title = title.trim();
-  if (body) prompt.body = body.trim();
-
+  if (title) prompt.title = title.trim().toLocaleUpperCase();
+  if (body) prompt.body = body.trim().toLocaleUpperCase();
+  prompt.last_updated = new Date();
   if (category) {
     const categoryEntity = await findCategoryByNameService(category);
     if (!categoryEntity) throw new Error("Category not found");

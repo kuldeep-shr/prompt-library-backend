@@ -29,7 +29,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "init-db": "ts-node src/scripts/init-db.ts",
-    "generate-keys": "ts-node src/scripts/generateKeys.ts",
+    "seed:categories": "ts-node src/scripts/seedCategories.ts",
     "truncate-db": "ts-node src/scripts/truncate-db.ts"
   },
   "devDependencies": {

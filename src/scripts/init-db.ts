@@ -6,12 +6,12 @@ const initDB = async () => {
     await AppDataSource.initialize();
     const queryRunner = AppDataSource.createQueryRunner();
 
-    const tables = await queryRunner.getTables([
-      "users"
-    ]);
+    // List all tables to check
+    const tablesToCheck = ["users", "categories", "prompts"];
+    const existingTables = await queryRunner.getTables(tablesToCheck);
 
-    if (tables.length === 4) {
-      console.log("✅ Tables already exist. Skipping creation.");
+    if (existingTables.length === tablesToCheck.length) {
+      console.log("✅ All tables already exist. Skipping creation.");
     } else {
       console.log("📦 Creating missing tables...");
       await AppDataSource.synchronize();
