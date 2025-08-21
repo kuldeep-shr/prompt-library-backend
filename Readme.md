@@ -38,9 +38,13 @@ A backend service to manage and organize prompts into different categories. User
     3.3 JWT_SECRET:<your secret key, sshh.. dont tell to anyone>
 
 4. Install dependencies use 'yarn install'
-5. For Development server use 'yarn dev'
-6. Build and start production server use 'yarn build' & 'yarn start'
+5. For Database creation run 'yarn run init-db' for  category creation run 'seed:categories' or use api endpoints given below
+6. For Development server use 'yarn dev'
+7. Build and start production server use 'yarn build' & 'yarn start'
 
+
+For Run the Test
+run 'yarn test'
 ```
 
 ---
