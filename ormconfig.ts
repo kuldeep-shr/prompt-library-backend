@@ -9,8 +9,8 @@ config();
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
-  database: process.env.DATABASE_PATH || "prompt.library.sqlite", 
-  entities: [User,Prompt,Category],
+  database: process.env.DATABASE_PATH || "prompt.library.sqlite",
+  entities: [User, Prompt, Category],
   synchronize: true, // ⚠️ auto-sync, turn off in production
   logging: false,
 });

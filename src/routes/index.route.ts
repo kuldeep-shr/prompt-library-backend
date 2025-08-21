@@ -1,11 +1,11 @@
 import * as express from "express";
 
 import userAuth from "./user/auth.route";
-import urlAuth from "./url/url.routes";
+import promptRoutes from "./prompt/prompt.route";
 
 const router = express.Router();
 
 router.use("/user/auth", userAuth);
-router.use("/url", urlAuth);
+router.use("/prompt", promptRoutes);
 
 export default router;

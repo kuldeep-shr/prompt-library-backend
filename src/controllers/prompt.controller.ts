@@ -1,96 +1,143 @@
-// import { Request, Response } from "express";
-// import { AppDataSource } from "../config/data-source";
-// import { Prompt } from "../entities/prompt.entity";
+import { Request, Response } from "express";
+import IController from "../../types/IController";
+import apiResponse from "../utilities/apiResponse";
+import httpStatusCodes from "http-status-codes";
+import {
+  createPromptService,
+  getPromptsService,
+  getPromptByIdService,
+  updatePromptService,
+  deletePromptService,
+} from "../services/prompt.service";
 
-// const promptRepo = AppDataSource.getRepository(Prompt);
+// ✅ Create Prompt
+export const createPrompt: IController = async (req, res) => {
+  try {
+    const { title, body, categoryId } = req.body;
+    const userId = req.user.id;
 
-// export class PromptController {
-//   // 📌 Create a new prompt
-//   static async createPrompt(req: Request, res: Response) {
-//     try {
-//       const { title, body, category, created_by } = req.body;
+    if (!title || !body || !categoryId || !userId) {
+      return apiResponse.error(
+        res,
+        httpStatusCodes.BAD_REQUEST,
+        "Missing required fields"
+      );
+    }
 
-//       if (!title || !body || !category || !created_by) {
-//         return res.status(400).json({ error: "Missing required fields" });
-//       }
+    const result = await createPromptService({
+      title,
+      body,
+      categoryId,
+      userId,
+    });
 
-//       const prompt = promptRepo.create({ title, body, category, created_by });
-//       await promptRepo.save(prompt);
+    apiResponse.result(res, result, httpStatusCodes.CREATED, result.message);
+  } catch (error: any) {
+    apiResponse.error(
+      res,
+      httpStatusCodes.INTERNAL_SERVER_ERROR,
+      error.message || "Something went wrong"
+    );
+  }
+};
 
-//       return res.status(201).json({ message: "Prompt created", prompt });
-//     } catch (err: any) {
-//       console.error("Create Prompt Error:", err.message);
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
+// ✅ Get All Prompts with filters (category + search)
+export const getPrompts: IController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { category, q } = req.query; // query params for filter & search
 
-//   // 📌 Get all prompts
-//   static async getPrompts(req: Request, res: Response) {
-//     try {
-//       const prompts = await promptRepo.find();
-//       return res.status(200).json(prompts);
-//     } catch (err: any) {
-//       console.error("Get Prompts Error:", err.message);
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
+    const prompts = await getPromptsService(userId, {
+      category: category as string,
+      search: q as string,
+    });
 
-//   // 📌 Get prompt by ID
-//   static async getPromptById(req: Request, res: Response) {
-//     try {
-//       const { id } = req.params;
-//       const prompt = await promptRepo.findOne({ where: { id } });
+    apiResponse.result(
+      res,
+      prompts,
+      httpStatusCodes.OK,
+      "Prompts fetched successfully"
+    );
+  } catch (error: any) {
+    apiResponse.error(
+      res,
+      httpStatusCodes.INTERNAL_SERVER_ERROR,
+      error.message
+    );
+  }
+};
 
-//       if (!prompt) {
-//         return res.status(404).json({ error: "Prompt not found" });
-//       }
+// ✅ Get Prompt by ID
+export const getPromptById: IController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
 
-//       return res.status(200).json(prompt);
-//     } catch (err: any) {
-//       console.error("Get Prompt Error:", err.message);
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
+    const prompt = await getPromptByIdService(id, userId);
 
-//   // 📌 Update a prompt
-//   static async updatePrompt(req: Request, res: Response) {
-//     try {
-//       const { id } = req.params;
-//       const { title, body, category } = req.body;
+    apiResponse.result(
+      res,
+      prompt,
+      httpStatusCodes.OK,
+      "Prompt fetched successfully"
+    );
+  } catch (error: any) {
+    apiResponse.error(
+      res,
+      error.message.includes("not found")
+        ? httpStatusCodes.NOT_FOUND
+        : httpStatusCodes.INTERNAL_SERVER_ERROR,
+      error.message
+    );
+  }
+};
 
-//       const prompt = await promptRepo.findOne({ where: { id } });
-//       if (!prompt) {
-//         return res.status(404).json({ error: "Prompt not found" });
-//       }
+// ✅ Update Prompt
+export const updatePrompt: IController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const data = req.body;
 
-//       prompt.title = title ?? prompt.title;
-//       prompt.body = body ?? prompt.body;
-//       prompt.category = category ?? prompt.category;
-//       prompt.last_updated = new Date();
+    const updated = await updatePromptService(id, data, userId);
 
-//       await promptRepo.save(prompt);
-//       return res.status(200).json({ message: "Prompt updated", prompt });
-//     } catch (err: any) {
-//       console.error("Update Prompt Error:", err.message);
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
+    apiResponse.result(res, updated, httpStatusCodes.OK, updated.message);
+  } catch (error: any) {
+    apiResponse.error(
+      res,
+      error.message.includes("not found")
+        ? httpStatusCodes.NOT_FOUND
+        : httpStatusCodes.INTERNAL_SERVER_ERROR,
+      error.message
+    );
+  }
+};
 
-//   // 📌 Delete a prompt
-//   static async deletePrompt(req: Request, res: Response) {
-//     try {
-//       const { id } = req.params;
-//       const prompt = await promptRepo.findOne({ where: { id } });
+// ✅ Delete Prompt
+export const deletePrompt: IController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
 
-//       if (!prompt) {
-//         return res.status(404).json({ error: "Prompt not found" });
-//       }
+    const deleted = await deletePromptService(id, userId);
 
-//       await promptRepo.remove(prompt);
-//       return res.status(200).json({ message: "Prompt deleted successfully" });
-//     } catch (err: any) {
-//       console.error("Delete Prompt Error:", err.message);
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
-// }
+    apiResponse.result(res, {}, httpStatusCodes.OK, deleted.message);
+  } catch (error: any) {
+    apiResponse.error(
+      res,
+      error.message.includes("not found")
+        ? httpStatusCodes.NOT_FOUND
+        : httpStatusCodes.INTERNAL_SERVER_ERROR,
+      error.message
+    );
+  }
+};

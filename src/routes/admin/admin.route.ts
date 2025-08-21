@@ -1,11 +1,11 @@
-import express from "express";
-import { celebrate } from "celebrate";
+// import express from "express";
+// import { celebrate } from "celebrate";
 
-import adminController from "../../controllers/adminController";
-// import userSchema from "../../../schemas/user.schema";
+// import adminController from "../../controllers/adminController";
+// // import userSchema from "../../../schemas/user.schema";
 
-const router = express.Router();
+// const router = express.Router();
 
-router.get("/dashboard", adminController.renderAdminDashboard);
+// router.get("/dashboard", adminController.renderAdminDashboard);
 
-export default router;
+// export default router;

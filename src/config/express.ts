@@ -8,7 +8,7 @@ import path from "path";
     all routes
 */
 import indexRoute from "../routes/index.route";
-import adminRoute from "../routes/index-admin.route";
+// import adminRoute from "../routes/index-admin.route";
 
 // import authenticate from "../middlewares/authenticate";
 // import joiErrorHandler from "../middlewares/joiErrorHandler";
@@ -25,7 +25,7 @@ app.use(morgan("dev"));
 
 // Router
 app.use(application.url.base, indexRoute);
-app.use(application.url.adminBase, adminRoute);
+// app.use(application.url.adminBase, adminRoute);
 
 // Static files for CSS
 app.use(express.static(path.join(__dirname, "../../public")));
