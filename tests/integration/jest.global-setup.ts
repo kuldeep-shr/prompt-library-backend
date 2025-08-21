@@ -19,7 +19,7 @@ function runScript(scriptName: string): Promise<void> {
 export default async () => {
   try {
     await runScript("init-db.ts");
-    await runScript("generateKeys.ts");
+    await runScript("seedCategories.ts");
     console.log("✅ All setup scripts executed successfully");
   } catch (err) {
     console.error("❌ Error during global setup", err);

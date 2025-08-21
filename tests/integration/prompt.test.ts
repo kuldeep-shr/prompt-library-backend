@@ -9,7 +9,7 @@ beforeAll(async () => {
     await AppDataSource.initialize();
   }
 
-  // Optionally, get a token if needed
+  // Register a user and get token
   const res = await request(app)
     .post("/api/user/auth/register")
     .send({
@@ -21,41 +21,56 @@ beforeAll(async () => {
   token = res.body.data.token;
 });
 
-describe("URL Shortener API", () => {
-  let code: string;
+describe("Prompt Library API", () => {
+  let promptId: string;
 
-  test("POST /api/url/shorten - should create a short URL", async () => {
+  test("POST /api/prompts - should create a prompt", async () => {
     const response = await request(app)
-      .post("/api/url/shorten")
+      .post("/api/prompts")
       .set("Authorization", `Bearer ${token}`)
       .send({
-        url: "https://example.com",
+        title: "Test Prompt",
+        body: "This is a test prompt body",
+        category: "finance",
       });
-
-    expect(response.status).toBe(200);
-    expect(response.body.data.short_code).toBeDefined();
-    code = response.body.data.short_code;
+    expect(response.status).toBe(201);
+    expect(response.body.data.prompt.id).toBeDefined();
+    promptId = response.body.data.prompt.id;
   });
 
-  test("GET /:code - should redirect to the original URL", async () => {
+  test("GET /api/prompts - should fetch the prompt by ID", async () => {
     const response = await request(app)
-      .get(`/api/url/${code}`)
-      .set("Authorization", `Bearer ${token}`);
-    expect([301, 302]).toContain(response.status);
-    expect(response.headers.location).toBe("https://example.com");
-  });
-
-  test("GET /api/url/analytics/:code - should return analytics data", async () => {
-    const response = await request(app)
-      .get(`/api/url/analytics/${code}`)
+      .get(`/api/prompts?category=finance`)
       .set("Authorization", `Bearer ${token}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.data).toHaveProperty("short_code");
-    expect(response.body.data).toHaveProperty("total_redirects");
-    expect(response.body.data).toHaveProperty("last_accesses");
-    expect(response.body.data).toHaveProperty("referrer_stats");
-    expect(response.body.data).toHaveProperty("country_stats");
+  });
+
+  test("GET /api/prompts - should search prompts by query", async () => {
+    const response = await request(app)
+      .get(`/api/prompts?`)
+      .query({ q: "Test" })
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+  });
+
+  test("PUT /api/prompts/:id - should update the prompt", async () => {
+    const response = await request(app)
+      .put(`/api/prompts/${promptId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ title: "Updated Test Prompt" });
+
+    expect(response.status).toBe(200);
+  });
+
+  test("DELETE /api/prompts/:id - should delete the prompt", async () => {
+    const response = await request(app)
+      .delete(`/api/prompts/${promptId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
   });
 });
 
