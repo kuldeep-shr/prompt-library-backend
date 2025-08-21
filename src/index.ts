@@ -32,7 +32,7 @@ async function startServer() {
     logger.info("✅ Database connected successfully");
 
     // ✅ Start Express Server
-    const PORT = process.env.PORT || 8080;
+    const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
       logger.info(`🚀 Server running on http://localhost:${PORT}`);
     });

@@ -8,7 +8,6 @@ import path from "path";
     all routes
 */
 import indexRoute from "../routes/index.route";
-// import adminRoute from "../routes/index-admin.route";
 
 // import authenticate from "../middlewares/authenticate";
 // import joiErrorHandler from "../middlewares/joiErrorHandler";
@@ -27,12 +26,6 @@ app.use(morgan("dev"));
 app.use(application.url.base, indexRoute);
 // app.use(application.url.adminBase, adminRoute);
 
-// Static files for CSS
-app.use(express.static(path.join(__dirname, "../../public")));
-
-// View engine setup
-app.set("views", path.join(__dirname, "../../views"));
-app.set("view engine", "ejs");
 // Joi Error Handler
 // app.use(joiErrorHandler);
 // Error Handler
