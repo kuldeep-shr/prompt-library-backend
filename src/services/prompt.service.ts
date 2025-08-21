@@ -164,3 +164,22 @@ export const deletePromptService = async (id: string, userId: string) => {
 
   return { message: "Prompt deleted successfully" };
 };
+
+export const clonePromptService = async (promptId: string, userId: string) => {
+  const promptRepo = AppDataSource.getRepository(Prompt);
+
+  // Find the original prompt
+  const originalPrompt = await promptRepo.findOne({ where: { id: promptId } });
+  if (!originalPrompt) throw new Error("Prompt not found");
+
+  // Automatically generate new title and body
+  const clonedPrompt = promptRepo.create({
+    title: originalPrompt.title + " copy",
+    body: originalPrompt.body + " copy",
+    category: originalPrompt.category,
+    created_by: { id: userId },
+  });
+
+  await promptRepo.save(clonedPrompt);
+  return clonedPrompt;
+};

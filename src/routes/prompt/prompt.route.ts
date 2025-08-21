@@ -9,6 +9,7 @@ import {
   getPrompts,
   updatePrompt,
   deletePrompt,
+  clonePrompt,
 } from "../../controllers/prompt.controller";
 
 const router = express.Router();
@@ -54,5 +55,7 @@ router.delete(
   // customRateLimiter,
   deletePrompt
 );
+
+router.post("/:id/clone", authenticateToken, clonePrompt);
 
 export default router;

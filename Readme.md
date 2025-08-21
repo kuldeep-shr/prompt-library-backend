@@ -91,13 +91,16 @@ All endpoints require **JWT authentication**.
 
 ### Prompts Endpoints
 
-| Method | Endpoint           | Description                             |
-| ------ | ------------------ | --------------------------------------- |
-| GET    | `/api/prompts`     | Get all prompts (supports query filter) |
-| GET    | `/api/prompts/:id` | Get prompt by ID                        |
-| POST   | `/api/prompts`     | Create a new prompt                     |
-| PUT    | `/api/prompts/:id` | Update prompt by ID                     |
-| DELETE | `/api/prompts/:id` | Delete prompt by ID                     |
+here id => Prompt Id
+
+| Method | Endpoint                 | Description                             |
+| ------ | ------------------------ | --------------------------------------- |
+| GET    | `/api/prompts`           | Get all prompts (supports query filter) |
+| GET    | `/api/prompts/:id`       | Get prompt by ID                        |
+| POST   | `/api/prompts`           | Create a new prompt                     |
+| PUT    | `/api/prompts/:id`       | Update prompt by ID                     |
+| DELETE | `/api/prompts/:id`       | Delete prompt by ID                     |
+| POST   | `/api/prompts/:id/clone` | Clone the prompt by ID                  |
 
 **Query Parameters for GET `/api/prompts`:**
 

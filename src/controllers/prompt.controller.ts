@@ -8,6 +8,7 @@ import {
   getPromptByIdService,
   updatePromptService,
   deletePromptService,
+  clonePromptService,
 } from "../services/prompt.service";
 
 // ✅ Create Prompt
@@ -122,6 +123,31 @@ export const deletePrompt: IController = async (req, res) => {
     const deleted = await deletePromptService(id, userId);
 
     apiResponse.result(res, {}, httpStatusCodes.OK, deleted.message);
+  } catch (error: any) {
+    apiResponse.error(
+      res,
+      error.message.includes("not found")
+        ? httpStatusCodes.NOT_FOUND
+        : httpStatusCodes.INTERNAL_SERVER_ERROR,
+      error.message
+    );
+  }
+};
+
+//clone the prompt
+export const clonePrompt: IController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const clonedPrompt = await clonePromptService(id, userId);
+
+    apiResponse.result(
+      res,
+      clonedPrompt,
+      httpStatusCodes.CREATED,
+      "Prompt cloned successfully"
+    );
   } catch (error: any) {
     apiResponse.error(
       res,
