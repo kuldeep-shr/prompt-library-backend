@@ -13,10 +13,10 @@ import {
 // ✅ Create Prompt
 export const createPrompt: IController = async (req, res) => {
   try {
-    const { title, body, categoryId } = req.body;
+    const { title, body, category } = req.body;
     const userId = req.user.id;
 
-    if (!title || !body || !categoryId || !userId) {
+    if (!title || !body || !category || !userId) {
       return apiResponse.error(
         res,
         httpStatusCodes.BAD_REQUEST,
@@ -27,7 +27,7 @@ export const createPrompt: IController = async (req, res) => {
     const result = await createPromptService({
       title,
       body,
-      categoryId,
+      category,
       userId,
     });
 
@@ -45,7 +45,7 @@ export const createPrompt: IController = async (req, res) => {
 export const getPrompts: IController = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { category, q } = req.query; // query params for filter & search
+    const { category, q } = req.query;
 
     const prompts = await getPromptsService(userId, {
       category: category as string,
@@ -68,10 +68,7 @@ export const getPrompts: IController = async (req, res) => {
 };
 
 // ✅ Get Prompt by ID
-export const getPromptById: IController = async (
-  req: Request,
-  res: Response
-) => {
+export const getPromptById: IController = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
@@ -96,10 +93,7 @@ export const getPromptById: IController = async (
 };
 
 // ✅ Update Prompt
-export const updatePrompt: IController = async (
-  req: Request,
-  res: Response
-) => {
+export const updatePrompt: IController = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
@@ -120,10 +114,7 @@ export const updatePrompt: IController = async (
 };
 
 // ✅ Delete Prompt
-export const deletePrompt: IController = async (
-  req: Request,
-  res: Response
-) => {
+export const deletePrompt: IController = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;

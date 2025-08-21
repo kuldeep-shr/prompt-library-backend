@@ -1,13 +1,13 @@
 import { ILike } from "typeorm";
 import { AppDataSource } from "../../ormconfig";
 import { Prompt } from "../../entities/prompt/Prompt";
-import { Category } from "../../entities/prompt/Category";
 import { User } from "../../entities/user/User";
+import { findCategoryByNameService } from "../services/category.service";
 
 interface PromptInput {
   title: string;
   body: string;
-  categoryId: string;
+  category: string; // category name
   userId: string;
 }
 
@@ -20,22 +20,24 @@ interface PromptQuery {
 export const createPromptService = async ({
   title,
   body,
-  categoryId,
+  category,
   userId,
 }: PromptInput) => {
   const promptRepo = AppDataSource.getRepository(Prompt);
-  const categoryRepo = AppDataSource.getRepository(Category);
   const userRepo = AppDataSource.getRepository(User);
 
   // Step 1: Validate user
-  const user = await userRepo.findOneBy({ id: userId });
+  const user = await userRepo.findOne({
+    where: { id: userId },
+    select: ["id", "name", "email"],
+  });
   if (!user) throw new Error("User not found");
 
-  // Step 2: Validate category
-  const category = await categoryRepo.findOneBy({ id: categoryId });
-  if (!category) throw new Error("Category not found");
+  // Step 2: Validate category by name
+  const categoryEntity = await findCategoryByNameService(category);
+  if (!categoryEntity) throw new Error("Category not found");
 
-  // Step 3: Prevent duplicate title
+  // Step 3: Prevent duplicate title for this user
   const existingPrompt = await promptRepo.findOne({
     where: { title, created_by: { id: userId } },
   });
@@ -49,9 +51,9 @@ export const createPromptService = async ({
 
   // Step 4: Save prompt
   const newPrompt = promptRepo.create({
-    title: title.trim(),
-    body: body.trim(),
-    category,
+    title: title.trim().toLocaleLowerCase(),
+    body: body.trim().toLocaleLowerCase(),
+    category: categoryEntity,
     created_by: user,
   });
 
@@ -64,28 +66,46 @@ export const createPromptService = async ({
   };
 };
 
-// 📝 Get All Prompts (with search & filter)
+// 📝 Get All Prompts (with search & category name filter)
 export const getPromptsService = async (
   userId: string,
   { category, search }: PromptQuery
 ) => {
   const promptRepo = AppDataSource.getRepository(Prompt);
 
-  const where: any = { created_by: { id: userId } };
+  const query = promptRepo
+    .createQueryBuilder("prompt")
+    .leftJoinAndSelect("prompt.category", "category")
+    .leftJoinAndSelect("prompt.created_by", "user")
+    .where("user.id = :userId", { userId });
 
-  if (category) {
-    where.category = { name: ILike(`%${category}%`) }; // fuzzy match on category name
+  // Fuzzy search for category name
+  if (category && category.trim() !== "") {
+    query.andWhere("LOWER(category.name) LIKE :category", {
+      category: `%${category.trim().toLowerCase()}%`,
+    });
   }
 
-  if (search) {
-    where.title = ILike(`%${search}%`); // fuzzy search on title
+  // Fuzzy search for title
+  if (search && search.trim() !== "") {
+    query.andWhere("LOWER(prompt.title) LIKE :search", {
+      search: `%${search.trim().toLowerCase()}%`,
+    });
   }
 
-  const prompts = await promptRepo.find({
-    where,
-    relations: ["category"],
-    order: { createdAt: "DESC" },
-  });
+  // Optional: select only prompt fields, add category & user explicitly
+  query
+    .select(["prompt.id", "prompt.title", "prompt.body", "prompt.createdAt"])
+    .addSelect([
+      "category.id",
+      "category.name",
+      "user.id",
+      "user.name",
+      "user.email",
+    ])
+    .orderBy("prompt.createdAt", "DESC");
+
+  const prompts = await query.getMany();
 
   return prompts;
 };
@@ -103,14 +123,13 @@ export const getPromptByIdService = async (id: string, userId: string) => {
   return prompt;
 };
 
-// 📝 Update Prompt
+// 📝 Update Prompt (using category name)
 export const updatePromptService = async (
   id: string,
-  { title, body, categoryId }: Partial<PromptInput>,
+  { title, body, category }: Partial<PromptInput>,
   userId: string
 ) => {
   const promptRepo = AppDataSource.getRepository(Prompt);
-  const categoryRepo = AppDataSource.getRepository(Category);
 
   const prompt = await promptRepo.findOne({
     where: { id, created_by: { id: userId } },
@@ -121,10 +140,10 @@ export const updatePromptService = async (
   if (title) prompt.title = title.trim();
   if (body) prompt.body = body.trim();
 
-  if (categoryId) {
-    const category = await categoryRepo.findOneBy({ id: categoryId });
-    if (!category) throw new Error("Category not found");
-    prompt.category = category;
+  if (category) {
+    const categoryEntity = await findCategoryByNameService(category);
+    if (!categoryEntity) throw new Error("Category not found");
+    prompt.category = categoryEntity;
   }
 
   await promptRepo.save(prompt);

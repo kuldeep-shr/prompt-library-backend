@@ -1,15 +1,22 @@
 import { AppDataSource } from "../../ormconfig";
 import { Category } from "../../entities/prompt/Category";
+import { ILike } from "typeorm";
 
 // 📝 Create Category
-export const createCategoryService = async (name: string) => {
+export const createCategoryService = async (
+  name: string,
+  description: string
+) => {
   const categoryRepo = AppDataSource.getRepository(Category);
 
   // Prevent duplicate category name
   const existing = await categoryRepo.findOne({ where: { name } });
   if (existing) throw new Error("Category with this name already exists");
 
-  const category = categoryRepo.create({ name: name.trim() });
+  const category = categoryRepo.create({
+    name: name.trim().toLocaleLowerCase(),
+    description: description.trim().toLocaleLowerCase(),
+  });
   await categoryRepo.save(category);
 
   return category;
@@ -23,6 +30,11 @@ export const getCategoriesService = async () => {
   });
 };
 
+export const findCategoryByNameService = async (name: string) => {
+  const repo = AppDataSource.getRepository(Category);
+  return repo.findOne({ where: { name: ILike(`%${name}%`) } });
+};
+
 // 📝 Get Single Category by ID
 export const getCategoryByIdService = async (id: string) => {
   const categoryRepo = AppDataSource.getRepository(Category);
@@ -30,16 +42,23 @@ export const getCategoryByIdService = async (id: string) => {
 };
 
 // 📝 Update Category
-export const updateCategoryService = async (id: string, name: string) => {
+export const updateCategoryService = async (
+  id: string,
+  name?: string,
+  description?: string
+) => {
   const categoryRepo = AppDataSource.getRepository(Category);
   const category = await categoryRepo.findOne({ where: { id } });
 
-  if (!category) throw new Error("Category not found");
+  if (!category) {
+    throw new Error("Category not found");
+  }
 
-  category.name = name.trim();
-  await categoryRepo.save(category);
+  // update fields if provided
+  if (name) category.name = name;
+  if (description) category.description = description;
 
-  return category;
+  return await categoryRepo.save(category);
 };
 
 // 📝 Delete Category
